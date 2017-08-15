@@ -1,0 +1,40 @@
+Basic Bookmarklet to change the URL Query String.  Replace URLPARAMETER with whatever parameter(s) you want to use.
+
+== Code ==
+<syntaxhighlight lang="javascript">
+javascript:void((function(){var onlyUrl = window.location.href.replace(window.location.search,''); location.href = onlyUrl+"URLPARAMETER";})());
+</syntaxhighlight>
+
+== How To Use the Bookmarklet ==
+# Create a new bookmark on your browser's toolbar (Any website will do).
+# Edit the Bookmark:
+## Rename the Bookmark.  Optional, but best to where you know what they do.
+## Replace the Bookmark's URL with the above code.
+## Replace URLPARAMETER with whatever action you want it to do.
+# Save the Bookmark.  It's that Simple.
+
+== Example ==
+The following Code Replaces "URLPARAMETER" with "?action=raw&templates=expand".  This will reload the page you are on and show the raw wikitext.  In addition, all template calls that aren't inside special tags (Such as <nowiki><Infobox></nowiki>) will be substituted into the wikitext.  This allows much easier troubleshooting when writing complicated Templates.
+<syntaxhighlight lang="javascript">
+javascript:void((function(){var onlyUrl = window.location.href.replace(window.location.search,''); location.href = onlyUrl+"?action=raw&templates=expand";})());
+</syntaxhighlight>
+
+== More Parameters ==
+*Edit Current Page:
+::?action=edit
+*Render Only the Current Pages Wikitext, with no Styling:
+::?action=render
+*View Page History
+::?action=history
+*Purge Current Page, forcing it to be reloaded from Wiki's backend:
+::?action=purge
+*View Page's Wikitext Only:
+::?action=raw
+*Show MediaWiki Messages (See Special:AllMessages for full Listing):
+::?uselang=qqx
+*Debug Mode, forces the ResourceLoader to load Non-Minified Styles and Scripts.
+::?debug=1
+
+== Links ==
+* [http://mediawiki.org/wiki/Manual:Parameters_to_index.php MediaWiki:Parameters to Index.php] - A much more in depth look at possible Parameters.
+*[http://fategrandorder.wikia.com/wiki/Help%3AURL_Parameters URL Parametrs]- My personal list of parameters, layed out differently than above.
