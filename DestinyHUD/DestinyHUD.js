@@ -1,10 +1,10 @@
 if ( typeof dhud === `undefined`) { dhud = {}; }
 
 
-dhud.API_KEY = `REDACTED`;
+dhud.API_KEY = `05dcc6c93fbd44bab9b93f1302d45188`;
 dhud.API_ROOT = `https://www.bungie.net/Platform/`;
 dhud.CLIENT_ID = `21910`;
-dhud.CLIENT_SECRET = `REDACTED`;
+dhud.CLIENT_SECRET = `0u2vuaAv9EZfwwaXe4EDHmCn-2hODD-QmsXmVVVrmGQ`;
 dhud.BASIC_AUTHORIZATION_HEADER = `Basic ` + btoa(dhud.CLIENT_ID + `:` + dhud.CLIENT_SECRET);
 
 
@@ -20,7 +20,11 @@ function sendAjax(postBody, path, callback) {
     }
   };
 
-  xhr.open(`POST`, url, true);
+  if (!postBody) {
+    xhr.open(`GET`, url, true);
+  } else {
+    xhr.open(`POST`, url, true);
+  }
   xhr.setRequestHeader(`X-API-Key`, dhud.API_KEY);
   xhr.setRequestHeader(`Content-Type`, `application/x-www-form-urlencoded`);
   xhr.setRequestHeader(`Authorization`, authHeader);
@@ -47,6 +51,17 @@ function getAccessToken() {
 }
 
 
+function getManifest() {
+  var get = undefined;
+  var path = `Destiny2/Manifest/`;
+  function processIt(data) {
+    var response = JSON.parse(data);
+    dhud.MANIFEST = response.Response;
+  }
+  sendAjax(get, path, processIt);
+}
+
+
 
 
 
@@ -64,6 +79,7 @@ if (urlParameters.state !== localStorage.State) {
 }
 localStorage.removeItem('State');
 getAccessToken();
+getManifest();
 console.info(`End of DestinyHUD Runtime`);
 console.log(dhud);
 
