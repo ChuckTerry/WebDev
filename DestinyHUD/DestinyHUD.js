@@ -1,4 +1,4 @@
-if ( typeof dhud === `undefined`) { dhud = {}; }
+if (typeof dhud === `undefined`) { dhud = {}; }
 
 
 dhud.API_KEY = `05dcc6c93fbd44bab9b93f1302d45188`;
@@ -7,15 +7,30 @@ dhud.CLIENT_ID = `21910`;
 dhud.CLIENT_SECRET = `0u2vuaAv9EZfwwaXe4EDHmCn-2hODD-QmsXmVVVrmGQ`;
 dhud.BASIC_AUTHORIZATION_HEADER = `Basic ` + btoa(dhud.CLIENT_ID + `:` + dhud.CLIENT_SECRET);
 
+Object.defineProperty(dhud, `BUNGIE_ID`, {
+  get: function() {
+    return MEMBERSHIP_ID;
+  },
+  set: function(x) {
+    MEMBERSHIP_ID = x;
+    getPlayerInfo();
+  }
+});
 
-function sendAjax(postBody, path, callback) {
+
+function sendAjax(postBody, path, authType, callback) {
   
   var url = dhud.API_ROOT + path;
   var authHeader = dhud.BASIC_AUTHORIZATION_HEADER;
+  var auth = authType || ``;
   var xhr = new XMLHttpRequest();
-  
+
+  if (auth.toUpperCase() === `BEARER`) {
+    authHeader = `Bearer ` + dhud.accessToken;
+  }
+
   xhr.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
+    if (this.readyState === 4 && this.status === 200) {
       callback(this.responseText);
     }
   };
@@ -40,25 +55,40 @@ function sendAjax(postBody, path, callback) {
 function getAccessToken() {
   var code = urlParameters.code;
   var postBody = `grant_type=authorization_code&code=` + code;
-  var path = `App/OAuth/Token/`
+  var path = `App/OAuth/Token/`;
+  var authType = `BASIC`;
   function processIt(data) {
     var response = JSON.parse(data);
     dhud.accessToken = response.access_token;
     dhud.refreshToken = response.refresh_token;
-    dhud.MEMBERSHIPID = response.membership_id;
+    dhud.BUNGIE_ID = response.membership_id;
   }
-  sendAjax(postBody, path, processIt);
+  sendAjax(postBody, path, authType, processIt);
 }
 
 
 function getManifest() {
   var get = undefined;
   var path = `Destiny2/Manifest/`;
+  var authType = `BASIC`;
   function processIt(data) {
     var response = JSON.parse(data);
     dhud.MANIFEST = response.Response;
   }
-  sendAjax(get, path, processIt);
+  sendAjax(get, path, authType, processIt);
+}
+
+function getPlayerInfo() {
+  var get = undefined;
+  var path = `User/GetBungieAccount/540784/254/`;
+  var authType = `BASIC`;
+  function processIt(data) {
+    var response = JSON.parse(data);
+    dhud.MEMBERSHIP_TYPE = response.Response.destinyMemberships["0"].membershipType;
+    dhud.MEMBERSHIP_ID = response.Response.destinyMemberships["0"].membershipId;
+    dhud.DISPLAY_NAME = response.Response.destinyMemberships["0"].displayName;
+  }
+  sendAjax(get, path, authType, processIt);
 }
 
 
@@ -87,6 +117,7 @@ console.log(dhud);
 
 
 
+
 /**
 ######################################################################
 
@@ -105,7 +136,7 @@ function processUrlParameters() {
   var search = /([^&=]+)=?([^&]*)/g;
   var decode = function (text) { return decodeURIComponent(text.replace(plus, ` `)); };
   var query  = window.location.search.substring(1);
-  while (match = search.exec(query)) {
+  while((match = search.exec(query)) !== null) {
     urlParameters[decode(match[1])] = decode(match[2]);
   }
   window.history.replaceState(null, null, window.location.pathname);
@@ -123,3 +154,5 @@ function nonce() {
   }
   return text;
 }
+
+// END CODE
