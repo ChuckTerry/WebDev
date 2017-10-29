@@ -7,13 +7,25 @@ dhud.CLIENT_ID = `21910`;
 dhud.CLIENT_SECRET = `0u2vuaAv9EZfwwaXe4EDHmCn-2hODD-QmsXmVVVrmGQ`;
 dhud.BASIC_AUTHORIZATION_HEADER = `Basic ` + btoa(dhud.CLIENT_ID + `:` + dhud.CLIENT_SECRET);
 
+
 Object.defineProperty(dhud, `BUNGIE_ID`, {
   get: function() {
-    return MEMBERSHIP_ID;
+    return BUNGIE_ID;
   },
   set: function(x) {
-    MEMBERSHIP_ID = x;
+    BUNGIE_ID = x;
     getPlayerInfo();
+  }
+});
+
+
+Object.defineProperty(dhud, `MEMBERSHIP_TYPE`, {
+  get: function() {
+    return MEMBERSHIP_TYPE;
+  },
+  set: function(x) {
+    MEMBERSHIP_TYPE = x;
+    getProfileInfo();
   }
 });
 
@@ -78,15 +90,30 @@ function getManifest() {
   sendAjax(get, path, authType, processIt);
 }
 
+
 function getPlayerInfo() {
   var get = undefined;
   var path = `User/GetBungieAccount/540784/254/`;
   var authType = `BASIC`;
   function processIt(data) {
     var response = JSON.parse(data);
-    dhud.MEMBERSHIP_TYPE = response.Response.destinyMemberships["0"].membershipType;
-    dhud.MEMBERSHIP_ID = response.Response.destinyMemberships["0"].membershipId;
     dhud.DISPLAY_NAME = response.Response.destinyMemberships["0"].displayName;
+    dhud.MEMBERSHIP_ID = response.Response.destinyMemberships["0"].membershipId;
+    dhud.MEMBERSHIP_TYPE = response.Response.destinyMemberships["0"].membershipType;
+  }
+  sendAjax(get, path, authType, processIt);
+}
+
+
+function getProfileInfo() {
+  var get = undefined;
+  // For components see: https://bungie-net.github.io/#/components/schemas/Destiny.DestinyComponentType
+  // No idea what all I should request here.  Time to decide what all I want this app to do.
+  var path = `Destiny2/${dhud.MEMBERSHIP_TYPE}/Profile/${dhud.MEMBERSHIP_ID}/?components=200`;
+  var authType = `BEARER`;
+  function processIt(data) {
+    var response = JSON.parse(data);
+    console.log(response.Response);
   }
   sendAjax(get, path, authType, processIt);
 }
