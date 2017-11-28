@@ -1,4 +1,5 @@
 // SiteTreeUtility - Shows the DOM tree layout of the current webpage.
+//
 //     Copyright (C) 2016 - 2017 Charles Vance Terry
 //     Email: ct.jcpm@gmail.com
 //
@@ -16,66 +17,67 @@
 //     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // End License
 
-/** Global Object */
-if (typeof jcpm === `undefined`) var jcpm = {};
+/**
+  Global Object
+**/
+var jcpm; if (typeof jcpm === `undefined`) jcpm = {};
 
 /**
- Initializer
-*/
+  Initializer
+**/
 jcpm.walkTreeStart = function(node) {
-  jcpm.init = true;                               // Set Init Flag
-  jcpm.walkTreeOutput = `HTML Tree Layout:\r\n`;  // Reset Tree/Add Header
+  jcpm.init = true;                              // Set Init Flag
+  jcpm.walkTreeOutput = `HTML Tree Layout:\r\n`; // Reset Tree/Add Header
   node = node || document.body;
-  jcpm.walkTree(node, 0);                         // Start
-  jcpm.walkTreeOutput += `End of HTML Tree`;      // Add Footer to Tree
-  jcpm.displayOutput();                           // Show Output in PopUp Window
-  jcpm.init = false;                              // Clear Init Flag
+  jcpm.walkTree(node, 0);                        // Start
+  jcpm.walkTreeOutput += `End of HTML Tree`;     // Add Footer to Tree
+  jcpm.displayOutput();                          // Show Output in PopUp Window
+  jcpm.init = false;                             // Clear Init Flag
 };
 
 /**
- Tree Walker
-*/
+  Tree Walker
+**/
 jcpm.walkTree = function(node, depth) {
-  if (!jcpm.init) {  // Ensure Proper Initialization
+  /* Ensure Proper Initialization */
+  if (!jcpm.init) {
     jcpm.walkTreeStart();
     return;
   }
-
-  /** Output Various Node Details */
+  /* Output Various Node Details */
   if (typeof node.tagName !== `undefined`) {
-    for (let i = 0; i < depth; i++) {
-      jcpm.walkTreeOutput += `  :`;                                  // Indention & Guides
+    for (let i = 0; i < depth; i += 1) {
+      jcpm.walkTreeOutput += `  :`;               // Indention & Guides
     }
-    jcpm.walkTreeOutput += (`<` + node.tagName.toLowerCase() + `>`); // Element Type
-    jcpm.walkTreeOutput += `    `;                                   // Element-Class Delimiter
+    var tagName = node.tagName.toLowerCase();
+    jcpm.walkTreeOutput += (`<` + tagName + `>`); // Element Type
     if (node.classList.length !== 0) {
-      for (let i = 0; i < node.classList.length; i++) {
-        jcpm.walkTreeOutput += (`.` + node.classList[i]);            // Element Class Name(s)
-      }
+      jcpm.walkTreeOutput += `    `;              // Element-Class Delimiter
+      node.classList.forEach( function(val) {
+        jcpm.walkTreeOutput += (`.` + val);       // Element Class Name(s)
+      });
     }
-    jcpm.walkTreeOutput += `    `;                                   // Element-ID Delimiter
     if (node.id !== ``) {
-      jcpm.walkTreeOutput += (`#` + node.id);                        // Element ID
+      jcpm.walkTreeOutput += `    `;              // Element-ID Delimiter
+      jcpm.walkTreeOutput += (`#` + node.id);     // Element ID
     }
-    jcpm.walkTreeOutput += `\r\n`;                                   // New Line
+    jcpm.walkTreeOutput += `\r\n`;                // New Line
   }
-
-  // Recursion to Work Through the Tree
-  for (let i = 0; i < node.childNodes.length; i++) {
-    jcpm.walkTree(node.childNodes[i], (depth + 1));
-  }
+  /* Recursion to Work Through the Tree */
+  node.childNodes.forEach( function(val, i, arr) {
+        jcpm.walkTree(arr[i], (depth + 1));
+      });
 };
-
 
 /**
   PopUp Window Creator
-  */
+**/
 jcpm.displayOutput = function() {
   let popUp = window.open(``, ``, `width=1200,height=600`);
   let node = document.createElement(`TEXTAREA`);
   let outputText = document.createTextNode(jcpm.walkTreeOutput);
   node.appendChild(outputText);
   node.setAttribute(`warp`, `soft`);
-  node.setAttribute(`style`, `margin: 0px;border: 0px;width:100%;height:100%;`);
+  node.setAttribute(`style`, `margin:0px;border:0px;width:100%;height:100%;`);
   popUp.document.body.appendChild(node);
 };
